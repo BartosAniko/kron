@@ -10,43 +10,13 @@ from selenium.webdriver.support.select import Select
 import re
 
 
-def login_request():
-
-    payload_tc = {
-        "tevenev": "x",
-        "pass": "y",
-        "login": "Gyere!",
-    }
-
-    with requests.session() as s:
-
-        resp = s.get("https://teveclub.hu", headers={"Connection": "keep-alive"})
-        session_id = resp.cookies.get_dict().get("SESSION_ID")
-
-        headers = resp.headers
-        print(f"URL: {resp.url}")
-        print(f"KUKI: {resp.cookies.get_dict()}\n")
-        print(f"HEDÖR: {resp.headers}\n")
-        print(f"ID: {session_id}\n")
-
-        response_post = s.post(
-            "https://teveclub.hu/", data=payload_tc, cookies={"SESSION_ID": session_id}
-        )
-        session_id = response_post.cookies.get_dict().get("SESSION_ID")
-        print(f"URL: {response_post.url}")
-
-
 def teach(browser):
-    # browser.get("https://www.teveclub.hu/tanit.pet")
-    # browser.find_element("css", "css=table:nth-child(1) > tbody > tr > td:nth-child(1) > a:nth-child(3) > img").click()
-    # browser.navigate().to("https://www.teveclub.hu/tanit.pet");
-    browser.find_element("alt", "Tanítom a tevémet!").click()
-    # browser.cli
-    # elems = browser.find_elements_by_css_selector(".sc-eYdvao.kvdWiq [href]")
-    # links = [elem.get_attribute('href') for elem in elems]
-    # elems = WebDriverWait(browser,10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".sc-eYdvao.kvdWiq [href]")))
-
-    return None
+    try:
+        browser.get('https://teveclub.hu/tanit.pet')
+        tanit_gomb = browser.find_element(By.XPATH, "//input[@name='learn'][@type='submit']")
+        tanit_gomb.click()
+    except Exception as e: 
+        print("valamiért nem sikerült tanítani") 
 
 
 def feed(browser):
@@ -71,8 +41,8 @@ def feed(browser):
     except Exception as e:
         print(f"ayy no : {e}")
 
-print("hello")
 
+print("hello")
 print("\n----------------------------------------------")
 print("selenium")
 
@@ -80,7 +50,7 @@ browser = webdriver.Firefox()
 browser.get("https://teveclub.hu/")
 
 f = open("config", encoding="utf-8")
-config = json.load(f)
+config = (json.load(f)).get("teveclub")
 username = config["username"]
 password = config["password"]
 f.close()
@@ -95,12 +65,17 @@ WebDriverWait(browser, timeout=10).until(element_present)
 
 print("logged in!")
 
-# Teach
-# teach(browser)
+
+browser.get('https://teveclub.hu/myteve.pet')
 
 # Feed
 feed(browser)
 
+# Teach
+teach(browser)
+
 # change_food(browser)
 
 print("goodbye")
+# browser.close()
+browser.quit()

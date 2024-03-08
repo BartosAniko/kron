@@ -29,3 +29,24 @@ Requirements:
 - store data in a database
 - sync with Fitbit to Strava and later Runkeeper
   
+
+#### Config file
+
+```
+{
+    "teveclub": {
+        "username": "USER",
+        "password": "PASS"
+    },
+    "ncore": {},
+    "email": {
+        "default_subject": "Kron notification",
+        "from": "me@gmail.com",
+        "to": "me@gmail.com",
+        "smtp": "smtp.gmail.com",
+        "username": "me@gmail.com",
+        "password": "APP_PASS",
+        "port": 465
+    }
+}
+```

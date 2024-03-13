@@ -50,3 +50,8 @@ Requirements:
     }
 }
 ```
+
+
+### To AWS
+
+ssm role add

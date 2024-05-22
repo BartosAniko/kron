@@ -1,11 +1,12 @@
 import boto3
 import json
 import requests
+import re
 from bs4 import BeautifulSoup
 
 
 HEADERS = {'Content-Type': 'application/x-www-form-urlencoded'}
-
+LOCAL_RUN = False
 
 def get_title(x):
     soup = BeautifulSoup(x.text, 'html.parser')
@@ -43,20 +44,44 @@ def is_highlighted(x, name):
     # Todo: write this function better
     soup = BeautifulSoup(x.text, 'html.parser')
     for span in soup.find_all('span'):
-        if 'class' in span and span.get('class')[0]=="kiem" and name in span.get_text():
-            return True
+        if "class=\"kiem\"":
+            if name in span.get_text():
+                return True
     return False
+
+def get_next_trick(x):
+    print('get the cheapest trick')
+    soup = BeautifulSoup(x.text, 'html.parser')
+    smallest = 1000
+    id=""
+    for span in soup.find_all('select'):
+        if span.get('name') == "tudomany":
+            for option in span.find_all('option'):
+                result = re.search(r".*value=\"(\d*)\".*\((\d*) lecke", str(option))
+                actual = int(result.group(2))
+                if(actual<smallest):
+                    smallest = actual
+                    id = result.group(1)
+                    print(str(option))
+    return id
 
 
 def lambda_handler(event, context):
     print("\n\n")
-    client = boto3.client('ssm')
-    parameter = client.get_parameter(Name='kron_secrets', WithDecryption=True)
-    login_payload = json.loads(parameter.get('Parameter',{}).get('Value',{})).get('teveclub',{}).get('login')
-    # print(login_payload)
+    global LOCAL_RUN
+    LOCAL_RUN = event.get('local_run', False)
+    if not LOCAL_RUN:
+        client = boto3.client('ssm')
+        parameter = client.get_parameter(Name='kron_secrets', WithDecryption=True)
+        login_payload = json.loads(parameter.get('Parameter',{}).get('Value',{})).get('teveclub',{}).get('login')
+    else:
+        with open('config.json') as f:
+            login_payload = (json.load(f)).get('teveclub',{}).get('login')
+    
+
+        # print(login_payload)
     
     with requests.Session() as s:
-
         # Login
         print("Try to log in...")
         payload = login_payload
@@ -96,9 +121,17 @@ def lambda_handler(event, context):
         payload = "farmdoit=tanit&learn=Tanulj+teve%21"
         teach = s.post("https://teveclub.hu/tanit.pet",  headers = HEADERS, data=payload)
         teach_result = s.get(location)
-        print("????")
         if not is_highlighted(teach_result, "Tanítás"):
             print("Teach was success.")
+        else:
+            print("Choose a 'cheap' trick")
+            teach = s.get("https://teveclub.hu/tanit.pet")
+            next_trick=get_next_trick(teach)
+            payload=f"tudomany={next_trick}&learn=Tanulj+teve%21"
+            teach = s.post("https://teveclub.hu/tanit.pet",  headers = HEADERS, data=payload)
+        
+        teach_result = s.get(location)
+        print(is_highlighted(teach_result, "Tanítás"))
 
         # Todo: Egyszam jatek   
     print("\n\n")
@@ -106,4 +139,7 @@ def lambda_handler(event, context):
 
 # For testing purposes when not running on Lambda
 if __name__ == "__main__":
-    lambda_handler(None, None)
+    event = {
+        'local_run': True
+    }
+    lambda_handler(event, None)

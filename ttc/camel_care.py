@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 
 
 HEADERS = {"Content-Type": "application/x-www-form-urlencoded"}
-LOCAL_RUN = False
 SNS_TOPIC = "alertme"
 
 STATUS = []
@@ -65,7 +64,7 @@ def free_list_next(x, actual):
 def is_highlighted(x, name):
     soup = BeautifulSoup(x.text, "html.parser")
     for span in soup.find_all("span"):
-        if 'class="kiem"':
+        if 'class="kiem"' in str(span):
             if name in span.get_text():
                 return True
     return False
@@ -87,9 +86,7 @@ def get_next_trick(x):
     return id
 
 
-def lambda_handler(event, context):
-    global LOCAL_RUN
-    LOCAL_RUN = event.get("local_run", False)
+def care_camel(LOCAL_RUN=False):
     try:
         # 1 - get secrets
         if not LOCAL_RUN:
@@ -198,7 +195,3 @@ def lambda_handler(event, context):
     return 0
 
 
-# For testing purposes when not running on Lambda
-if __name__ == "__main__":
-    event = {"local_run": True}
-    lambda_handler(event, None)

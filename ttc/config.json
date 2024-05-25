@@ -1,0 +1,19 @@
+{
+    "teveclub": {
+        "login": "tevenev=xxx&pass=xxx&x=15&y=27&login=Gyere%21"
+    },
+    "ncore": {
+        "login": "set_lang=hu&submitted=1&nev=xxx&passxxx&ne_leptessen_ki=1"
+    },
+    "email": {
+        "default_subject": "Kron notification",
+        "from": "xxx@gmail.com",
+        "to": "xxx@gmail.com",
+        "smtp": "smtp.gmail.com",
+        "username": "xxx@gmail.com",
+        "password": "wdhf vqmy jsbo mhjg",
+        "port": 465
+    }
+}
+
+

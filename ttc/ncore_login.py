@@ -2,6 +2,7 @@ import requests
 import json
 from bs4 import BeautifulSoup
 import boto3
+import email_sender
 
 def login_to_ncore(LOCAL_RUN=False):
     with requests.Session() as s:
@@ -34,5 +35,5 @@ def login_to_ncore(LOCAL_RUN=False):
         if points >= 0 and response.status_code == 200:
             print(points)
         else:
-            print("ERROR")
+            email_sender.send_alert(LOCAL_RUN, "Problem with ncore login")
 

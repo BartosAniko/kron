@@ -3,6 +3,7 @@ import json
 import requests
 import re
 from bs4 import BeautifulSoup
+import email_sender
 
 
 HEADERS = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -10,12 +11,6 @@ SNS_TOPIC = "alertme"
 
 STATUS = []
 ERRORS = []
-
-
-def sns_sender(message):
-    sns = boto3.resource("sns")
-    topic = sns.create_topic(Name=SNS_TOPIC)
-    response = topic.publish(Message=message)
 
 
 def _print(text):
@@ -184,11 +179,10 @@ def care_camel(LOCAL_RUN=False):
             if is_highlighted(teach_result2, "Tanítás"):
                 _error("Teach still highlighted!")
 
-            if not LOCAL_RUN and len(ERRORS) > 0:
-                sns_sender(f"Teve is not ok:  {', '.join(ERRORS)}")
+            if len(ERRORS) > 0:
+                email_sender.send_alert(LOCAL_RUN, f"Teve is not ok:  {', '.join(ERRORS)}")
     except Exception as e:
-        if not LOCAL_RUN:
-            sns_sender(f"Something wrong with camel: {e}, {', '.join(ERRORS)}")
+        email_sender.send_alert(LOCAL_RUN, f"Something wrong with camel: {e}, {', '.join(ERRORS)}")
 
         # Todo: Egyszam jatek
     print("\n\n")

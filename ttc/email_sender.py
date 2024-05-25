@@ -23,14 +23,16 @@ def send_email(subject, message):
        smtp_server.login(username, password)
        smtp_server.sendmail(sender, to, msg.as_string())
 
-def main():
-    try:
-        send_email("TEST", "Hello Me!")        
-    except Exception as e:
-        print(f"Something went wrong: {e!r}") 
+
+def send_sns(message):
+    sns = boto3.resource("sns")
+    topic = sns.create_topic(Name=SNS_TOPIC)
+    response = topic.publish(Message=message)
 
 
-if __name__ == "__main__":
-    main()
-
+def send_alert(LOCAL_RUN, message):
+    if LOCAL_RUN:
+        send_email("alert from kron", message)
+    else:
+        send_sns(message)
 
